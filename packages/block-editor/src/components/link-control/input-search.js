@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { noop } from 'lodash';
-
-/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
@@ -19,17 +14,17 @@ import {
 
 const LinkControlInputSearch = ( {
 	value,
-    onChange,
-    onSelect,
-    renderSuggestions,
-    fetchSuggestions,
-    onReset,
-    onKeyDown,
-    onKeyPress,
+	onChange,
+	renderSuggestions,
+	fetchSuggestions,
+	onReset,
+	onKeyDown,
+	onKeyPress,
 } ) => {
 	return (
+		// eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
 		<form
-			onSubmit={ event => event.preventDefault() }
+			onSubmit={ ( event ) => event.preventDefault() }
 			onKeyDown={ ( event ) => {
 				if ( event.keyCode === ENTER ) {
 					// onSelect( suggestion )( event );

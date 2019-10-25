@@ -23,7 +23,6 @@ import {
 	DOWN,
 	BACKSPACE,
 	ENTER,
-	ESCAPE,
 } from '@wordpress/keycodes';
 import { __ } from '@wordpress/i18n';
 import {
@@ -44,14 +43,11 @@ function NavigationMenuItemEdit( {
 	isSelected,
 	isParentOfSelectedBlock,
 	setAttributes,
-	fetchSearchSuggestions,
 } ) {
 	const plainTextRef = useRef( null );
 	const [ isLinkOpen, setIsLinkOpen ] = useState( false );
-	const [ isEditingLink, setIsEditingLink ] = useState( false );
-	const [ urlInput, setUrlInput ] = useState( null );
-
-	const inputValue = urlInput !== null ? urlInput : url;
+	const [ linkValue, setLinkValue ] = useState( null );
+	const [ linkSettings, setLinkSettings ] = useState( { 'new-tab': false } );
 
 	const handleLinkControlOnKeyDown = ( event ) => {
 		const { keyCode } = event;
@@ -60,30 +56,11 @@ function NavigationMenuItemEdit( {
 			// Stop the key event from propagating up to ObserveTyping.startTypingInTextField.
 			event.stopPropagation();
 		}
-
-		if ( ESCAPE === keyCode ) {
-			closeLinkControl ();
-		}
 	};
 
-	const closeLinkControl = () => {
-		setIsEditingLink( false );
-		setUrlInput( null );
-		setIsLinkOpen( false );
-	};
-
-	const autocompleteRef = useRef( null );
-
-	const onFocusOutside = ( event ) => {
-		const autocompleteElement = autocompleteRef.current;
-		if ( autocompleteElement && autocompleteElement.contains( event.target ) ) {
-			return;
-		}
-		closeLinkControl();
-	};
-
-	const { label, url } = attributes;
+	const { label } = attributes;
 	let content;
+
 	if ( isSelected ) {
 		content = (
 			<div className="wp-block-navigation-menu-item__edit-container">
@@ -117,9 +94,17 @@ function NavigationMenuItemEdit( {
 						<LinkControl
 							className="wp-block-navigation-menu-item__inline-link-input"
 							onKeyDown={ handleLinkControlOnKeyDown }
-							onKeyPress={ ( event ) => { event.stopPropagation() } }
-							onClose={ onFocusOutside }
-							fetchSearchSuggestions={ fetchSearchSuggestions }
+							onKeyPress={ ( event ) => event.stopPropagation() }
+							onClose={ () => setIsLinkOpen( false ) }
+							currentLink={ linkValue }
+							onLinkChange={ setLinkValue }
+							currentSettings={ linkSettings }
+							onSettingChange={ ( setting, value ) =>
+								setLinkSettings( {
+									...linkSettings,
+									[ setting ]: value,
+								} )
+							}
 						/>
 					}
 				</Toolbar>
@@ -192,11 +177,10 @@ function NavigationMenuItemEdit( {
 }
 
 export default withSelect( ( select, ownProps ) => {
-	const { hasSelectedInnerBlock, getSettings } = select( 'core/block-editor' );
+	const { hasSelectedInnerBlock } = select( 'core/block-editor' );
 	const { clientId } = ownProps;
 
 	return {
 		isParentOfSelectedBlock: hasSelectedInnerBlock( clientId, true ),
-		fetchSearchSuggestions: getSettings().__experimentalFetchLinkSuggestions,
 	};
 } )( NavigationMenuItemEdit );
